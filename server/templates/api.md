@@ -7,7 +7,7 @@
 所有接口都需要带上 `validate` 参数，该参数值和配置文件中的 `server/validate` 参数值相同。示例：
 
 ``` sh
-$ curl localhost:5001/history?validate=f4bde2a342c7c75aa276f78b26cfbd8a
+$ curl localhost:5001/history?validate=41724998a398a3f11ac18a1b7e2537e0
 ```
 
 接口返回：
@@ -40,7 +40,7 @@ $ curl localhost:5001/history?validate=f4bde2a342c7c75aa276f78b26cfbd8a
 - 示例：
 
 ``` sh
-$ curl -X POST localhost:5001/operate -d "type=restart&validate=f4bde2a342c7c75aa276f78b26cfbd8a"
+$ curl -X POST localhost:5001/operate -d "type=restart&validate=41724998a398a3f11ac18a1b7e2537e0"
 ```
 
 - 返回：
@@ -66,7 +66,7 @@ $ curl -X POST localhost:5001/operate -d "type=restart&validate=f4bde2a342c7c75a
 - 示例：
 
 ``` sh
-$ curl localhost:5001/log?validate=f4bde2a342c7c75aa276f78b26cfbd8a&lines=10
+$ curl localhost:5001/log?validate=41724998a398a3f11ac18a1b7e2537e0&lines=10
 ```
 
 - 返回：
@@ -99,7 +99,7 @@ $ curl localhost:5001/log?validate=f4bde2a342c7c75aa276f78b26cfbd8a&lines=10
 - 示例：
 
 ``` sh
-$ curl -X POST localhost:5001/chat -d "type=text&query=%E7%8E%B0%E5%9C%A8%E5%87%A0%E7%82%B9&validate=f4bde2a342c7c75aa276f78b26cfbd8a&uuid=chated17be5d-0240-c9ba-2b2e-7eb98588cf34"
+$ curl -X POST localhost:5001/chat -d "type=text&query=%E7%8E%B0%E5%9C%A8%E5%87%A0%E7%82%B9&validate=41724998a398a3f11ac18a1b7e2537e0&uuid=chated17be5d-0240-c9ba-2b2e-7eb98588cf34"
 ```
 
 - 返回：
@@ -124,7 +124,7 @@ $ curl -X POST localhost:5001/chat -d "type=text&query=%E7%8E%B0%E5%9C%A8%E5%87%
 - 示例：
 
 ``` sh
-$ curl localhost:5001/history?validate=f4bde2a342c7c75aa276f78b26cfbd8a
+$ curl localhost:5001/history?validate=41724998a398a3f11ac18a1b7e2537e0
 ```
 
 - 返回：
@@ -153,7 +153,7 @@ $ curl localhost:5001/history?validate=f4bde2a342c7c75aa276f78b26cfbd8a
 - 示例：
 
 ``` sh
-$ curl localhost:5001/config?validate=f4bde2a342c7c75aa276f78b26cfbd8a\&key=server
+$ curl localhost:5001/config?validate=41724998a398a3f11ac18a1b7e2537e0\&key=server
 ```
 
 - 返回：

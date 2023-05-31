@@ -10,7 +10,6 @@ import urllib3
 from robot.Updater import Updater
 from robot.Conversation import Conversation
 from robot.LifeCycleHandler import LifeCycleHandler
-
 from robot import config, utils, constants, logging, detector
 
 from server import server
@@ -34,7 +33,14 @@ class Joi(object):
         print(
             """
 ********************************************************
-
+::::::'##::'#######::'####:::::::::::::'###::::'####:
+:::::: ##:'##.... ##:. ##:::::::::::::'## ##:::. ##::
+:::::: ##: ##:::: ##:: ##::::::::::::'##:. ##::: ##::
+:::::: ##: ##:::: ##:: ##::'#######:'##:::. ##:: ##::
+'##::: ##: ##:::: ##:: ##::........: #########:: ##::
+ ##::: ##: ##:::: ##:: ##::::::::::: ##.... ##:: ##::
+. ######::. #######::'####:::::::::: ##:::: ##:'####:
+:......::::.......:::....:::::::::::..:::::..::....::
 ********************************************************
 
             后台管理端：http://{}:{}
@@ -50,7 +56,8 @@ class Joi(object):
         )
 
         self.conversation = Conversation(self._profiling)
-        self.conversation.say(f"{config.get('first_name', '主人')} 你好！试试对我喊唤醒词叫醒我吧", True)
+        self.conversation.say(
+            f"{config.get('owner_name', '主人')} 请用唤醒次叫醒我吧", True)
         self.lifeCycleHandler = LifeCycleHandler(self.conversation)
         self.lifeCycleHandler.onInit()
 

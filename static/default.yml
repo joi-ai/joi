@@ -1,4 +1,6 @@
-robot_name_cn: '乔'
+robot_name: 'joi' # 语音助理名称
+robot_name_cn: '乔' 
+owner_name: '主人' #主人名
 timezone: HKT
 location: '北京'
 
@@ -6,7 +8,7 @@ location: '北京'
 server:
     enable: true
     host: '0.0.0.0'  # ip 地址
-    port: '5001'     # 端口号
+    port: '2049'     # 端口号
     username: 'joi'  # 用户名
     # cookie 的 secret ，用于对 cookie 的内容进行加密及防止篡改
     # 建议使用 os.urandom(24) 生成一串随机字符串
@@ -14,13 +16,13 @@ server:
     # 密码的 md5，可以用 python3 joi.py md5 "密码" 获得
     # 初始密码为 joi@2049
     # 强烈建议修改!!!
-    validate: 'f4bde2a342c7c75aa276f78b26cfbd8a'
+    validate: '41724998a398a3f11ac18a1b7e2537e0'
 
 # 热词唤醒机制
 # 可选值：
 # porcupine
 # snowboy
-detector: snowboy
+detector: porcupine
 # 灵敏度
 sensitivity: 0.5
 
@@ -29,11 +31,11 @@ sensitivity: 0.5
 # 可以获取 access_key 和训练自己的唤醒词
 porcupine: 
     keywords:
-        - 'porcupine'
+        - 'hello joi'
     keyword_paths:
         # 支持追加多个唤醒词
         # 自定义唤醒词请放到 $HOME/.joi 目录中
-        # - 'spiderman.ppn'
+        - 'hello_joi_en.ppn'
     access_key: 'xxxxxxxxxxxxxxxxxxxxxxxx'
 
 # snowboy 离线唤醒
@@ -42,25 +44,8 @@ porcupine:
 hotword: 'snowboy.umdl'  # 唤醒词模型，如要自定义请放到 $HOME/.joi 目录中
 silent_threshold: 20 # 判断为静音的阈值。环境比较吵杂的地方可以适当调大
 recording_timeout: 15 # 录制的语音最大长度（秒）
-snowboy_token: your_token # 你的token，用于 train 命令训练语音
+snowboy_token: 'your_token' # 你的token，用于 train 命令训练语音
 
-# Muse 脑机
-# 推荐搭配 Muse Monitor 使用
-# 并开启 OSC stream
-# 同时眨眼和咬牙齿可以实现唤醒
-muse:
-    enable: false
-    ip: '0.0.0.0'  # 请修改为本机的 ip 地址
-    port: 5001     # 请修改为 OSC 的端口号
-
-# 行空板
-# 需搭配行空板使用
-# 展示专为行空板设计的 GUI
-# 摇一摇可以实现唤醒 
-# https://www.unihiker.com/
-unihiker:
-    enable: false
-    beep: false # 是否需要开启主板的蜂鸣提示音
 
 # 是否展示灯光效果
 # 支持 Respeaker 2 Mics 和 Google AIY Voice Kit 两种
@@ -105,7 +90,7 @@ tts_engine: edge-tts
 # tencent-asr   - 腾讯云语音识别（推荐）
 # azure-asr     - 微软语音识别
 # openai        - OpenAI Whisper
-asr_engine: baidu-asr
+asr_engine: tencent-asr
 
 # 百度语音服务
 # http://yuyin.baidu.com/
@@ -208,7 +193,7 @@ nlu_engine: unit
 # openai    - OpenAI ChatGPT
 # anyq      - AnyQ
 # tuling    - 图灵机器人
-robot: unit
+robot: openai
 
 # 百度 UNIT
 unit:
@@ -275,19 +260,6 @@ email:
     imap_port: '143'  # 这里填写非SSL协议端口号    
     read_email_title: true  # 当有邮件时，是否朗读邮件标题
 
-# 拍照
-# 需接入摄像头才能使用
-camera:
-    enable: false
-    type: 0                 # 摄像头类型 0：usb_camera，1：树莓派 5MP 摄像头，2：Mac OSX 摄像头
-                            # 对于 Mac OSX 摄像头，请先安装 imagesnap 。例如 Mac OSX： brew install imagesnap
-    dest_path: "/Users/username/Pictures/" # 保存目录
-    quality: 5              # 成像质量（0~100），不支持 imagesnap
-    vertical_flip: true     # 竖直翻转，不支持 imagesnap
-    horizontal_flip: false  # 水平翻转，不支持 imagesnap
-    count_down: 3           # 倒计时（秒），仅当开启倒计时时有效
-    sound: true             # 是否有拍照音效
-    usb_camera: false       # 是否是 USB 摄像头（已废弃，请使用 type）
 
 ## 本地音乐插件
 LocalPlayer:

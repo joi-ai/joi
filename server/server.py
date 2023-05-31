@@ -173,12 +173,14 @@ class ChatHandler(BaseHandler):
                         onSay=lambda msg, audio, plugin: self.onResp(
                             msg, audio, plugin
                         ),
-                        onStream=lambda data, resp_uuid: self.onStream(data, resp_uuid),
+                        onStream=lambda data, resp_uuid: self.onStream(
+                            data, resp_uuid),
                     )
 
             elif self.get_argument("type") == "voice":
                 voice_data = self.get_argument("voice")
-                tmpfile = utils.write_temp_file(base64.b64decode(voice_data), ".wav")
+                tmpfile = utils.write_temp_file(
+                    base64.b64decode(voice_data), ".wav")
                 fname, suffix = os.path.splitext(tmpfile)
                 nfile = fname + "-16k" + suffix
                 # downsampling
@@ -187,7 +189,8 @@ class ChatHandler(BaseHandler):
                 utils.check_and_delete(tmpfile)
                 conversation.doConverse(
                     nfile,
-                    onSay=lambda msg, audio, plugin: self.on_resp(msg, audio, plugin),
+                    onSay=lambda msg, audio, plugin: self.on_resp(
+                        msg, audio, plugin),
                     onStream=lambda stream: self.onStream(stream),
                 )
             else:
@@ -392,7 +395,8 @@ class LoginHandler(BaseHandler):
             "/server/validate"
         ):
             logger.info("login success")
-            self.set_secure_cookie("validation", config.get("/server/validate"))
+            self.set_secure_cookie(
+                "validation", config.get("/server/validate"))
             self.redirect("/")
         else:
             self.render("login.html", error="登录失败")
@@ -438,16 +442,12 @@ application = tornado.web.Application(
         (r"/gethistory", GetHistoryHandler),
         (r"/getconfig", ConfigHandler),
         (
-            r"/photo/(.+\.(?:png|jpg|jpeg|bmp|gif|JPG|PNG|JPEG|BMP|GIF))",
-            tornado.web.StaticFileHandler,
-            {"path": config.get("/camera/dest_path", "server/static")},
-        ),
-        (
             r"/audio/(.+\.(?:mp3|wav|pcm))",
             tornado.web.StaticFileHandler,
             {"path": constants.TEMP_PATH},
         ),
-        (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "server/static"}),
+        (r"/static/(.*)", tornado.web.StaticFileHandler,
+         {"path": "server/static"}),
     ],
     **settings,
 )
