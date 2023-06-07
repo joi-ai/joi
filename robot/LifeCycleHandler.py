@@ -9,7 +9,6 @@ import _thread as thread
 from watchdog.observers import Observer
 from robot import config, constants, statistic, Player
 from robot.ConfigMonitor import ConfigMonitor
-from robot.sdk import LED
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +36,6 @@ def singleton(cls):
 class LifeCycleHandler(object):
     def __init__(self, conversation):
         self._observer = Observer()
-        self._unihiker = None
         self._wakeup = None
         self._conversation = conversation
 
@@ -58,9 +56,6 @@ class LifeCycleHandler(object):
 
         # 加载历史提醒
         self._read_reminders()
-
-        # LED 灯
-        self._init_LED()
 
     def _read_reminders(self):
         logger.info("重新加载提醒信息")
@@ -84,28 +79,6 @@ class LifeCycleHandler(object):
                                 job_id=job.job_id,
                             )
 
-    def _init_LED(self):
-        if config.get("/LED/enable", False) and config.get("/LED/type") == "aiy":
-            thread.start_new_thread(self._aiy_button_event, ())
-
-    def _aiy_button_event(self):
-        """
-        Google AIY VoiceKit 的监听逻辑
-        """
-        try:
-            from aiy.board import Board
-        except ImportError:
-            logger.error(
-                "错误：请确保当前硬件环境为Google AIY VoiceKit并正确安装了驱动", stack_info=True)
-            return
-        with Board() as board:
-            while True:
-                board.button.wait_for_press()
-                logger.info("Google AIY Voicekit 触发唤醒")
-                self._conversation.interrupt()
-                query = self._conversation.activeListen()
-                self._conversation.doResponse(query)
-
     def _beep_hi(self, onCompleted=None):
         Player.play(constants.getData("beep_hi.wav"), onCompleted)
 
@@ -118,10 +91,6 @@ class LifeCycleHandler(object):
         """
         logger.info("onWakeup")
         self._beep_hi(onCompleted=onCompleted)
-        if config.get("/LED/enable", False):
-            LED.wakeup()
-        self._unihiker and self._unihiker.record(1, "我正在聆听...")
-        self._unihiker and self._unihiker.wakeup()
 
     def onThink(self):
         """
@@ -129,10 +98,6 @@ class LifeCycleHandler(object):
         """
         logger.info("onThink")
         self._beep_lo()
-        self._unihiker and self._unihiker.think()
-        self._unihiker and self._unihiker.record(1, "我正在思考...")
-        if config.get("/LED/enable", False):
-            LED.think()
 
     def onResponse(self, t=1, text=""):
         """
@@ -142,9 +107,6 @@ class LifeCycleHandler(object):
             text = text[:60] + "..." if len(text) >= 60 else text
         else:
             text = text[:9] + "..." if len(text) >= 9 else text
-        self._unihiker and self._unihiker.record(t, text)
-        if config.get("/LED/enable", False):
-            LED.off()
 
     def onRestore(self):
         """

@@ -75,7 +75,8 @@ class Conversation(object):
                     self.player.play(
                         voice,
                         not cache,
-                        onCompleted=lambda: self._lastCompleted(index, onCompleted),
+                        onCompleted=lambda: self._lastCompleted(
+                            index, onCompleted),
                     )
                     self.tts_index += 1
                 return voice
@@ -91,7 +92,8 @@ class Conversation(object):
                         self.player.play(
                             voice,
                             not cache,
-                            onCompleted=lambda: self._lastCompleted(index, onCompleted),
+                            onCompleted=lambda: self._lastCompleted(
+                                index, onCompleted),
                         )
                         self.tts_index += 1
                     return voice
@@ -113,9 +115,11 @@ class Conversation(object):
     def reInit(self):
         """重新初始化"""
         try:
-            self.asr = ASR.get_engine_by_slug(config.get("asr_engine", "tencent-asr"))
+            self.asr = ASR.get_engine_by_slug(
+                config.get("asr_engine", "tencent-asr"))
             self.ai = AI.get_robot_by_slug(config.get("robot", "tuling"))
-            self.tts = TTS.get_engine_by_slug(config.get("tts_engine", "baidu-tts"))
+            self.tts = TTS.get_engine_by_slug(
+                config.get("tts_engine", "baidu-tts"))
             self.nlu = NLU.get_engine_by_slug(config.get("nlu_engine", "unit"))
             self.player = Player.SoxPlayer()
             self.brain = Brain(self)
@@ -167,7 +171,8 @@ class Conversation(object):
                 # 没命中技能，使用机器人回复
                 if self.ai.SLUG == "openai":
                     stream = self.ai.stream_chat(query)
-                    self.stream_say(stream, True, onCompleted=self.checkRestore)
+                    self.stream_say(
+                        stream, True, onCompleted=self.checkRestore)
                 else:
                     msg = self.ai.chat(query, parsed)
                     self.say(msg, True, onCompleted=self.checkRestore)
@@ -177,7 +182,8 @@ class Conversation(object):
                 if self.player:
                     if self.player.is_playing():
                         logger.debug("等说完再checkRestore")
-                        self.player.appendOnCompleted(lambda: self.checkRestore())
+                        self.player.appendOnCompleted(
+                            lambda: self.checkRestore())
                 else:
                     logger.debug("checkRestore")
                     self.checkRestore()
@@ -250,7 +256,8 @@ class Conversation(object):
                 )
             urls = re.findall(url_pattern, text)
             for url in urls:
-                text = text.replace(url, f'<a href={url} target="_blank">{url}</a>')
+                text = text.replace(
+                    url, f'<a href={url} target="_blank">{url}</a>')
             self.lifeCycleHandler.onResponse(t, text)
             self.history.add_message(
                 {
@@ -349,7 +356,7 @@ class Conversation(object):
         resp_uuid = str(uuid.uuid1())
         audios = []
         if onCompleted is None:
-            onCompleted = lambda: self._onCompleted(msg)
+            def onCompleted(): return self._onCompleted(msg)
         self.tts_index = 0
         self.tts_count = 0
         index = 0
@@ -362,7 +369,8 @@ class Conversation(object):
                 if "```" in line.strip():
                     skip_tts = True
                 if not skip_tts:
-                    audio = self._tts_line(line.strip(), cache, index, onCompleted)
+                    audio = self._tts_line(
+                        line.strip(), cache, index, onCompleted)
                     if audio:
                         self.tts_count += 1
                         audios.append(audio)
@@ -398,7 +406,7 @@ class Conversation(object):
         logger.info(f"即将朗读语音：{msg}")
         lines = re.split("。|！|？|\!|\?|\n", msg)
         if onCompleted is None:
-            onCompleted = lambda: self._onCompleted(msg)
+            def onCompleted(): return self._onCompleted(msg)
         self.tts_index = 0
         self.tts_count = len(lines)
         logger.debug(f"tts_count: {self.tts_count}")
@@ -407,7 +415,7 @@ class Conversation(object):
 
     def activeListen(self, silent=False):
         """
-        主动问一个问题(适用于多轮对话)
+        唤醒并聆听
         :param silent: 是否不触发唤醒表现（主要用于极客模式）
         :param
         """
