@@ -27,8 +27,10 @@ def initDetector(joi):
         if keyword_paths:
             porcupine = pvporcupine.create(
                 access_key=access_key,
-                keyword_paths=[constants.getConfigData(kw) for kw in keyword_paths],
-                sensitivities=[config.get("sensitivity", 0.5)] * len(keyword_paths),
+                keyword_paths=[constants.getConfigData(
+                    kw) for kw in keyword_paths],
+                sensitivities=[config.get(
+                    "sensitivity", 0.5)] * len(keyword_paths),
             )
         else:
             porcupine = pvporcupine.create(
@@ -37,7 +39,8 @@ def initDetector(joi):
                 sensitivities=[config.get("sensitivity", 0.5)] * len(keywords),
             )
 
-        recorder = PvRecorder(device_index=-1, frame_length=porcupine.frame_length)
+        recorder = PvRecorder(
+            device_index=-1, frame_length=porcupine.frame_length)
         recorder.start()
 
         try:
@@ -51,7 +54,8 @@ def initDetector(joi):
                         "[porcupine] Keyword {} Detected at time {}".format(
                             kw,
                             time.strftime(
-                                "%Y-%m-%d %H:%M:%S", time.localtime(time.time())
+                                "%Y-%m-%d %H:%M:%S", time.localtime(
+                                    time.time())
                             ),
                         )
                     )
@@ -62,7 +66,8 @@ def initDetector(joi):
                     joi.conversation.doResponse(query)
                     recorder.start()
         except pvporcupine.PorcupineActivationError as e:
-            logger.error("[Porcupine] AccessKey activation error", stack_info=True)
+            logger.error(
+                "[Porcupine] AccessKey activation error", stack_info=True)
             raise e
         except pvporcupine.PorcupineActivationLimitError as e:
             logger.error(

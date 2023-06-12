@@ -6,6 +6,11 @@ import platform
 import queue
 import signal
 import threading
+import sys
+from PyQt5.QtCore import QUrl
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout
+from PyQt5.QtMultimedia import QMediaPlaylist, QMediaPlayer, QMediaContent
+from PyQt5.QtMultimediaWidgets import QVideoWidget
 
 from robot import logging
 from ctypes import CFUNCTYPE, c_char_p, c_int, cdll
@@ -20,7 +25,8 @@ def py_error_handler(filename, line, function, err, fmt):
     pass
 
 
-ERROR_HANDLER_FUNC = CFUNCTYPE(None, c_char_p, c_int, c_char_p, c_int, c_char_p)
+ERROR_HANDLER_FUNC = CFUNCTYPE(
+    None, c_char_p, c_int, c_char_p, c_int, c_char_p)
 
 c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
 
@@ -245,7 +251,8 @@ class MusicPlayer(SoxPlayer):
             if volume >= 100:
                 volume = 100
                 self.plugin.say("音量已经最大啦")
-            subprocess.run(["osascript", "-e", f"set volume output volume {volume}"])
+            subprocess.run(
+                ["osascript", "-e", f"set volume output volume {volume}"])
         elif system == "Linux":
             res = subprocess.run(
                 ["amixer sget Master | grep 'Mono:' | awk -F'[][]' '{ print $2 }'"],
@@ -280,7 +287,8 @@ class MusicPlayer(SoxPlayer):
             if volume <= 20:
                 volume = 20
                 self.plugin.say("音量已经很小啦")
-            subprocess.run(["osascript", "-e", f"set volume output volume {volume}"])
+            subprocess.run(
+                ["osascript", "-e", f"set volume output volume {volume}"])
         elif system == "Linux":
             res = subprocess.run(
                 ["amixer sget Master | grep 'Mono:' | awk -F'[][]' '{ print $2 }'"],
@@ -300,3 +308,32 @@ class MusicPlayer(SoxPlayer):
         else:
             self.plugin.say("当前系统不支持调节音量")
         self.resume()
+
+
+class VideoPlayer(QWidget):
+
+    def __init__(self):
+        super().__init__()
+
+        self.playlist = QMediaPlaylist()
+        # 定义媒体播放器并设置播放列表
+        self.player = QMediaPlayer(self)
+        self.player.setPlaylist(self.playlist)
+
+        self.video_widget = QVideoWidget(self)
+        self.player.setVideoOutput(self.video_widget)
+
+        layout = QHBoxLayout()
+        layout.addWidget(self.video_widget)
+        self.setLayout(layout)
+
+    def add_medias(self, *medias):
+        for m in medias:
+            self.playlist.addMedia(QMediaContent(QUrl.fromUserInput(m)))
+
+    def play(self):
+        self.player.play()
+
+    def play_video(self, url):
+        self.playlist.addMedia(QMediaContent(QUrl.fromUserInput(url)))
+        self.player.play()

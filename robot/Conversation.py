@@ -27,6 +27,7 @@ from robot import (
     Player,
     statistic,
     TTS,
+    TTV,
     utils,
 )
 
@@ -35,8 +36,9 @@ logger = logging.getLogger(__name__)
 
 
 class Conversation(object):
-    def __init__(self, profiling=False):
+    def __init__(self, profiling=False, parent=None):
         self.brain, self.asr, self.ai, self.tts, self.nlu = None, None, None, None, None
+        self.parent = parent
         self.reInit()
         self.scheduler = Scheduler(self)
         # 历史会话消息
@@ -50,6 +52,7 @@ class Conversation(object):
         self.onStream = None
         self.hasPardon = False
         self.player = Player.SoxPlayer()
+        self.video_player = Player.VideoPlayer()
         self.lifeCycleHandler = LifeCycleHandler(self)
         self.tts_count = 0
         self.tts_index = 0
@@ -120,6 +123,8 @@ class Conversation(object):
             self.ai = AI.get_robot_by_slug(config.get("robot", "tuling"))
             self.tts = TTS.get_engine_by_slug(
                 config.get("tts_engine", "baidu-tts"))
+            self.ttv = TTV.get_engine_by_slug(
+                config.get("/ttv_engine/type", "did"))
             self.nlu = NLU.get_engine_by_slug(config.get("nlu_engine", "unit"))
             self.player = Player.SoxPlayer()
             self.brain = Brain(self)
@@ -169,13 +174,17 @@ class Conversation(object):
                 self.player.stop()
             else:
                 # 没命中技能，使用机器人回复
-                if self.ai.SLUG == "openai":
+                if self.ai.SLUG == "openai" and config.get('/openai/use_stream', True):
                     stream = self.ai.stream_chat(query)
                     self.stream_say(
                         stream, True, onCompleted=self.checkRestore)
                 else:
                     msg = self.ai.chat(query, parsed)
-                    self.say(msg, True, onCompleted=self.checkRestore)
+                    if (config.get('/visual/enable', True)):
+                        # 使用 did 播放视频
+                        self.talk(msg, True, onCompleted=self.checkRestore)
+                    else:
+                        self.say(msg, True, onCompleted=self.checkRestore)
         else:
             # 命中技能
             if lastImmersiveMode and lastImmersiveMode != self.matchPlugin:
@@ -327,6 +336,7 @@ class Conversation(object):
                         all_task.append(task)
                     else:
                         self.tts_count -= 1
+
                 for future in as_completed(all_task):
                     audio = future.result()
                     if audio:
@@ -412,6 +422,24 @@ class Conversation(object):
         logger.debug(f"tts_count: {self.tts_count}")
         audios = self._tts(lines, cache, onCompleted)
         self._after_play(msg, audios, plugin)
+
+    def talk(self, msg, cache=False, onCompleted=None):
+        """
+            使用虚拟人物播放对话
+            :param msg: 内容
+            :param cache: 是否缓存视频
+        """
+        if not msg:
+            return
+        if onCompleted is None:
+            def onCompleted(): return self._onCompleted(msg)
+        logger.info(f"开始合成语音视频: {msg}")
+        video_id = self.ttv.generate_video(msg)
+        video_url = self.ttv.get_video(video_id)
+        self.parent.viewer.add_widget(self.video_player)
+        self.video_player.add_medias(video_url)
+        self.video_player.play()
+        onCompleted()
 
     def activeListen(self, silent=False):
         """

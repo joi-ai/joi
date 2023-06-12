@@ -110,7 +110,8 @@ class UnitRobot(AbstractRobot):
             logger.info("{} 回答：{}".format(self.SLUG, result))
             return result
         except Exception:
-            logger.critical("UNIT robot failed to response for %r", msg, exc_info=True)
+            logger.critical(
+                "UNIT robot failed to response for %r", msg, exc_info=True)
             return "抱歉, 百度UNIT服务回答失败"
 
 
@@ -170,7 +171,8 @@ class AnyQRobot(AbstractRobot):
             else:
                 return get_unknown_response()
         except Exception:
-            logger.critical("AnyQ robot failed to response for %r", msg, exc_info=True)
+            logger.critical(
+                "AnyQ robot failed to response for %r", msg, exc_info=True)
             return "抱歉, AnyQ回答失败"
 
 
@@ -191,6 +193,7 @@ class OPENAIRobot(AbstractRobot):
         prefix="",
         proxy="",
         api_base="",
+        use_stream=True
     ):
         """
         OpenAI机器人
@@ -219,6 +222,7 @@ class OPENAIRobot(AbstractRobot):
         self.presence_penalty = presence_penalty
         self.stop_ai = stop_ai
         self.api_base = api_base if api_base else "https://api.openai.com/v1/chat"
+        self.use_stream = use_stream
         self.context = []
 
     @classmethod
@@ -243,7 +247,8 @@ class OPENAIRobot(AbstractRobot):
             "Authorization": "Bearer " + self.openai.api_key,
         }
 
-        data = {"model": "gpt-3.5-turbo", "messages": self.context, "stream": True}
+        data = {"model": "gpt-3.5-turbo",
+                "messages": self.context, "stream": True}
         logger.info("开始流式请求")
         url = self.api_base + "/completions"
         # 请求接收流式数据
@@ -283,7 +288,8 @@ class OPENAIRobot(AbstractRobot):
                                         elif i == 40:
                                             logger.debug("......")
                                         one_message["content"] = (
-                                            one_message["content"] + delta_content
+                                            one_message["content"] +
+                                            delta_content
                                         )
                                         yield delta_content
 
@@ -359,7 +365,8 @@ def get_robot_by_slug(slug):
 
     selected_robots = list(
         filter(
-            lambda robot: hasattr(robot, "SLUG") and robot.SLUG == slug, get_robots()
+            lambda robot: hasattr(
+                robot, "SLUG") and robot.SLUG == slug, get_robots()
         )
     )
     if len(selected_robots) == 0:

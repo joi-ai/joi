@@ -6,10 +6,12 @@ import fire
 import signal
 import hashlib
 import urllib3
+import threading
 
 from robot.Updater import Updater
 from robot.Conversation import Conversation
 from robot.LifeCycleHandler import LifeCycleHandler
+from robot.Viewer import Viewer
 from robot import config, utils, constants, logging, detector
 
 from server import server
@@ -28,7 +30,7 @@ class Joi(object):
     def init(self):
         self.detector = None
         self.porcupine = None
-        self.gui = None
+        self.viewer = Viewer()
         self._interrupted = False
         print(
             """
@@ -55,7 +57,7 @@ class Joi(object):
             )
         )
 
-        self.conversation = Conversation(self._profiling)
+        self.conversation = Conversation(self._profiling, self)
         self.conversation.say(
             f"{config.get('owner_name', '主人')} 请用唤醒次叫醒我吧", True)
         self.lifeCycleHandler = LifeCycleHandler(self.conversation)
@@ -94,12 +96,18 @@ class Joi(object):
         signal.signal(signal.SIGINT, self._signal_handler)
         # 后台管理端
         server.run(self.conversation, self, debug=self._debug)
+
         try:
             # 初始化离线唤醒
-            detector.initDetector(self)
+            detector_t = threading.Thread(
+                target=detector.initDetector, args=(self, ))
+            detector_t.start()
+            # detector.initDetector(self)
         except AttributeError:
             logger.error("初始化离线唤醒功能失败", stack_info=True)
             pass
+
+        sys.exit(self.viewer.exec_app())
 
     def help(self):
         print(

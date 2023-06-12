@@ -47,6 +47,21 @@ recording_timeout: 15 # 录制的语音最大长度（秒）
 snowboy_token: 'your_token' # 你的token，用于 train 命令训练语音
 
 
+# 可视化人物显示
+# 浏览 https://studio.d-id.com 获取更多信息
+ttv_engine:
+    type: did
+    enable: true
+
+did:
+    api_key: 'xxxxxxxxxxxxxxxxxxxxxxxx'
+    base_url: 'https://api.d-id.com'
+    provider: 
+        type: 'microsoft'
+        voice_id: 'en-US-JennyNeural'
+    
+
+
 # 是否展示灯光效果
 # 支持 Respeaker 2 Mics 和 Google AIY Voice Kit 两种
 # 必须具备相应的硬件和驱动
@@ -242,6 +257,8 @@ openai:
     # -2.0 ~ 2.0 之间的数字，正值会根据到目前为止是否出现在文本中来惩罚新 tokens，从而增加模型谈论新主题的可能性
     presence_penalty: 0.0
     stop_ai: 'stop'
+    # chat-gpt 默认使用流式请求，如果不想开启流式请求，可以设置为 false
+    use_stream: true
     # 如果需要代理，反注释下面的配置进行修改
     # proxy: '127.0.0.1:1080'
     # 如果需要更换 api_base ，反注释下面的配置进行修改
