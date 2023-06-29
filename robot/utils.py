@@ -269,7 +269,7 @@ def getCache(msg):
 
 
 def saveCache(voice, msg):
-    """获取缓存的语音"""
+    """保存缓存的语音"""
     _, ext = os.path.splitext(voice)
     md5 = hashlib.md5(msg.encode("utf-8")).hexdigest()
     target = os.path.join(constants.TEMP_PATH, md5 + ext)

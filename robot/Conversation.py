@@ -8,6 +8,8 @@ import re
 import os
 import threading
 import traceback
+import urllib
+import uuid
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -52,7 +54,6 @@ class Conversation(object):
         self.onStream = None
         self.hasPardon = False
         self.player = Player.SoxPlayer()
-        self.video_player = Player.VideoPlayer()
         self.lifeCycleHandler = LifeCycleHandler(self)
         self.tts_count = 0
         self.tts_index = 0
@@ -141,7 +142,7 @@ class Conversation(object):
     def _InGossip(self, query):
         return self.immersiveMode in ["Gossip"] and not "闲聊" in query
 
-    def doResponse(self, query, UUID="", onSay=None, onStream=None):
+    def doResponse(self, query, UUID="", onSay=None, onStream=None, mute=False):
         """
         响应指令
 
@@ -180,11 +181,13 @@ class Conversation(object):
                         stream, True, onCompleted=self.checkRestore)
                 else:
                     msg = self.ai.chat(query, parsed)
-                    if (config.get('/visual/enable', True)):
+                    if config.get('/ttv_engine/enable'):
                         # 使用 did 播放视频
-                        self.talk(msg, True, onCompleted=self.checkRestore)
+                        self.talk(
+                            msg, False, onCompleted=self.checkRestore, mute=mute)
                     else:
-                        self.say(msg, True, onCompleted=self.checkRestore)
+                        self.say(
+                            msg, True, onCompleted=self.checkRestore, mute=mute)
         else:
             # 命中技能
             if lastImmersiveMode and lastImmersiveMode != self.matchPlugin:
@@ -397,7 +400,7 @@ class Conversation(object):
         self.appendHistory(1, msg, UUID=resp_uuid, plugin="")
         self._after_play(msg, audios, "")
 
-    def say(self, msg, cache=False, plugin="", onCompleted=None, append_history=True):
+    def say(self, msg, cache=False, plugin="", onCompleted=None, append_history=True, mute=False):
         """
         说一句话
         :param msg: 内容
@@ -412,6 +415,8 @@ class Conversation(object):
 
         if not msg:
             return
+        if mute:
+            return
 
         logger.info(f"即将朗读语音：{msg}")
         lines = re.split("。|！|？|\!|\?|\n", msg)
@@ -423,22 +428,35 @@ class Conversation(object):
         audios = self._tts(lines, cache, onCompleted)
         self._after_play(msg, audios, plugin)
 
-    def talk(self, msg, cache=False, onCompleted=None):
+    def talk(self, msg, cache=False, path=None,append_history=True, onCompleted=None, mute=False):
         """
-            使用虚拟人物播放对话
+            文字生成人物语音视频
             :param msg: 内容
             :param cache: 是否缓存视频
         """
+        if append_history:
+            self.appendHistory(1, msg)
         if not msg:
             return
+        
+        if mute:
+            return
+
         if onCompleted is None:
             def onCompleted(): return self._onCompleted(msg)
         logger.info(f"开始合成语音视频: {msg}")
         video_id = self.ttv.generate_video(msg)
         video_url = self.ttv.get_video(video_id)
-        self.parent.viewer.add_widget(self.video_player)
-        self.video_player.add_medias(video_url)
-        self.video_player.play()
+        if cache:
+            donwnload_path = path if path is not None else os.path.join(
+                os.path.abspath(os.path.dirname(__file__)),
+                f'../temp/{uuid.uuid4().hex}.mp4'
+            )
+            urllib.request.urlretrieve(video_url, donwnload_path)
+        logger.info(f'video_url:{video_url}')
+
+        self.parent.viewer.thread.signal.emit(video_url)
+
         onCompleted()
 
     def activeListen(self, silent=False):

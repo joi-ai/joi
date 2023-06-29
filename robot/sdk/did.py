@@ -7,14 +7,12 @@ logger = logging.getLogger(__name__)
 
 
 class Did(object):
-    def __init__(self, api_key, base_url, provider):
-        self.api_key, self.base_url, self.provider = api_key, base_url, provider
-        logger.info(api_key, base_url, provider)
+    def __init__(self, credentials, base_url, provider, image_url, driver_url):
+        self.credentials, self.base_url, self.provider, self.image_url, self.driver_url = credentials, base_url, provider, image_url, driver_url
 
     def create_talk(self, input):
 
         url = self.base_url + '/talks'
-        authorization = "Basic " + self.api_key
 
         payload = {
             "script": {
@@ -28,12 +26,12 @@ class Did(object):
                 "fluent": "false",
                 "pad_audio": "0.0"
             },
-            "source_url": "https://raw.githubusercontent.com/zexiplus/assets/main/image/xolson_chibi_avatar.png"
+            "source_url": self.image_url
         }
         headers = {
             "accept": "application/json",
             "content-type": "application/json",
-            "authorization": authorization
+            "authorization": self.credentials
         }
 
         response = requests.post(url, json=payload, headers=headers)
@@ -41,11 +39,40 @@ class Did(object):
         return response
 
     def get_talk(self, talk_id):
-        url = f"https://api.d-id.com/talks/{talk_id}"
-        authorization = "Basic " + self.api_key
+        url = f"{self.base_url}/talks/{talk_id}"
         headers = {
             "accept": "application/json",
-            "authorization": authorization
+            "authorization": self.credentials
+        }
+
+        response = requests.get(url, headers=headers)
+
+        return response
+
+    def create_animation(self, driver_url=None):
+        url = self.base_url + '/animations'
+        d_url = driver_url if driver_url is not None else self.driver_url
+        headers = {
+            "accept": "application/json",
+            "content-type": "application/json",
+            "authorization": self.credentials
+        }
+
+        payload = {
+            "source_url": self.image_url,
+            "driver_url": d_url
+        }
+
+        response = requests.post(url, json=payload, headers=headers)
+
+        return response
+
+    def get_animation(self, animation_id):
+
+        url = f"{self.base_url}/animations/{animation_id}"
+        headers = {
+            "accept": "application/json",
+            "authorization": self.credentials
         }
 
         response = requests.get(url, headers=headers)

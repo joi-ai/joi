@@ -6,11 +6,6 @@ import platform
 import queue
 import signal
 import threading
-import sys
-from PyQt5.QtCore import QUrl
-from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout
-from PyQt5.QtMultimedia import QMediaPlaylist, QMediaPlayer, QMediaContent
-from PyQt5.QtMultimediaWidgets import QVideoWidget
 
 from robot import logging
 from ctypes import CFUNCTYPE, c_char_p, c_int, cdll
@@ -308,32 +303,3 @@ class MusicPlayer(SoxPlayer):
         else:
             self.plugin.say("当前系统不支持调节音量")
         self.resume()
-
-
-class VideoPlayer(QWidget):
-
-    def __init__(self):
-        super().__init__()
-
-        self.playlist = QMediaPlaylist()
-        # 定义媒体播放器并设置播放列表
-        self.player = QMediaPlayer(self)
-        self.player.setPlaylist(self.playlist)
-
-        self.video_widget = QVideoWidget(self)
-        self.player.setVideoOutput(self.video_widget)
-
-        layout = QHBoxLayout()
-        layout.addWidget(self.video_widget)
-        self.setLayout(layout)
-
-    def add_medias(self, *medias):
-        for m in medias:
-            self.playlist.addMedia(QMediaContent(QUrl.fromUserInput(m)))
-
-    def play(self):
-        self.player.play()
-
-    def play_video(self, url):
-        self.playlist.addMedia(QMediaContent(QUrl.fromUserInput(url)))
-        self.player.play()

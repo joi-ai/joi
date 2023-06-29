@@ -144,6 +144,7 @@ $(document).ready(function() {
         e.preventDefault();
         var disabled = $('#query');
         disabled.disable();
+        var mute = $('#mute')[0].checked;
         var uuid = 'chat' + guid();
         var query = $("input#query")[0].value;
         if (query.trim() == '') {
@@ -152,7 +153,7 @@ $(document).ready(function() {
         }
         appendHistory(0, query, uuid);
         $('input#query').val('');
-        var args = {"type": "text", "query": query, 'validate': getCookie('validation'), "uuid": uuid}
+        var args = {"type": "text", "query": query, 'validate': getCookie('validation'), "uuid": uuid, mute: mute}
         $.ajax({
             url: '/chat',
             type: "POST",

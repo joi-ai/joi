@@ -163,6 +163,8 @@ class ChatHandler(BaseHandler):
             if self.get_argument("type") == "text":
                 query = self.get_argument("query")
                 uuid = self.get_argument("uuid")
+                mute = self.get_argument("mute") == "true"
+                print('********** mute is', self.get_argument("mute"))
                 if query == "":
                     res = {"code": 1, "message": "query text is empty"}
                     self.write(json.dumps(res))
@@ -175,6 +177,7 @@ class ChatHandler(BaseHandler):
                         ),
                         onStream=lambda data, resp_uuid: self.onStream(
                             data, resp_uuid),
+                        mute=mute
                     )
 
             elif self.get_argument("type") == "voice":
@@ -453,16 +456,18 @@ application = tornado.web.Application(
 )
 
 
-def start_server(con, wk):
+def start_server(con, j):
     global conversation, joi
     conversation = con
-    joi = wk
+    joi = j
+
     if config.get("/server/enable", False):
         port = config.get("/server/port", "5001")
         try:
             asyncio.set_event_loop(asyncio.new_event_loop())
-            application.listen(int(port))
+            application.listen(port)
             tornado.ioloop.IOLoop.instance().start()
+
         except Exception as e:
             logger.critical(f"服务器启动失败: {e}", stack_info=True)
 

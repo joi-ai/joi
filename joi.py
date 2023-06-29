@@ -13,6 +13,7 @@ from robot.Conversation import Conversation
 from robot.LifeCycleHandler import LifeCycleHandler
 from robot.Viewer import Viewer
 from robot import config, utils, constants, logging, detector
+from robot.detector import DetectorThread
 
 from server import server
 from tools import make_json, solr_tools
@@ -29,8 +30,9 @@ class Joi(object):
 
     def init(self):
         self.detector = None
+        self.detector_thread = DetectorThread(detector.initDetector, self)
         self.porcupine = None
-        self.viewer = Viewer()
+        self.viewer = Viewer(self)
         self._interrupted = False
         print(
             """
@@ -58,8 +60,18 @@ class Joi(object):
         )
 
         self.conversation = Conversation(self._profiling, self)
-        self.conversation.say(
-            f"{config.get('owner_name', '主人')} 请用唤醒次叫醒我吧", True)
+        if (config.get('/ttv_engine/enable')):
+            # todo: generate welcome video
+            self.conversation.talk(
+                f"{config.get('owner_name', '主人')} {config.get('welcome_statement', '请用唤醒词与我聊天吧')}", True, path=os.path.join(
+                    os.path.abspath(os.path.dirname(__file__)),
+                    './static/welcome.mp4'
+                )
+            )
+
+        else:
+            self.conversation.say(
+                f"{config.get('owner_name', '主人')} {config.get('welcome_statement', '请用唤醒词与我聊天吧')}", True)
         self.lifeCycleHandler = LifeCycleHandler(self.conversation)
         self.lifeCycleHandler.onInit()
 
@@ -96,18 +108,18 @@ class Joi(object):
         signal.signal(signal.SIGINT, self._signal_handler)
         # 后台管理端
         server.run(self.conversation, self, debug=self._debug)
-
         try:
             # 初始化离线唤醒
-            detector_t = threading.Thread(
-                target=detector.initDetector, args=(self, ))
-            detector_t.start()
-            # detector.initDetector(self)
+            if config.get('/ttv_engine/enable'):
+                self.detector_thread.start()
+            else:
+                detector.initDetector(self)
+
         except AttributeError:
             logger.error("初始化离线唤醒功能失败", stack_info=True)
             pass
-
-        sys.exit(self.viewer.exec_app())
+        if config.get('/ttv_engine/enable'):
+            self.viewer.exec_app()
 
     def help(self):
         print(

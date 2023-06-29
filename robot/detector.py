@@ -1,7 +1,9 @@
 import time
 
+from PyQt5.QtCore import QThread, pyqtSignal
 from snowboy import snowboydecoder
 from robot import config, logging, utils, constants
+
 
 logger = logging.getLogger(__name__)
 
@@ -116,3 +118,16 @@ def initDetector(joi):
             detector.terminate()
         except Exception as e:
             logger.critical(f"离线唤醒机制初始化失败：{e}", stack_info=True)
+
+
+class DetectorThread(QThread):
+
+    signal = pyqtSignal(str)
+
+    def __init__(self, target, args):
+        super().__init__()
+        self.target = target
+        self.args = args
+
+    def run(self):
+        self.target(self.args)
