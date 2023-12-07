@@ -1,8 +1,8 @@
 
-# JOI AI
+# JOI
 
-JOI AI 是一个开源智能语音机器人项目，借助大语言模型与众多云厂商的服务，致力于打造更好的全息 AI 语音助手。
-JOI AI 具有高定制化功能，可以设定你想要的任意角色作为你的语伴，同时具有良好的设备兼容性。
+JOI 是一个开源智能语音机器人项目，借助大语言模型与众多云厂商的服务，致力于打造更好的全息 AI 语音助手。
+JOI 具有高定制化功能，可以设定你想要的任意角色作为你的语伴，同时具有良好的设备兼容性。
 
 ## 特性
 
@@ -33,14 +33,12 @@ joi-ai 支持运行在以下的设备和系统中：
 - Intel Edison with Ubilinux （Debian Wheezy 7.8）
 - 装有 WSL（Windows Subsystem for Linux） 的 Windows
 
-
-
 ## 安装
 
 ### 克隆仓库
 
 ```bash
-git clone https://github.com/zexiplus/joi-ai
+git clone https://github.com/joi-ai/joi
 ```
 
 ### 2. 安装 sox, ffmpeg 和 PyAudio
